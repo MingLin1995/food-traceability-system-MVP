@@ -1,0 +1,22 @@
+FROM oven/bun:1-alpine
+
+WORKDIR /app
+
+RUN apk add --no-cache netcat-openbsd
+
+COPY package.json bun.lock* ./
+
+RUN bun install
+
+COPY prisma ./prisma
+RUN bunx prisma generate
+
+EXPOSE 3000
+
+# 複製 entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+ENTRYPOINT ["docker-entrypoint.sh"]
+
+CMD ["bun", "run", "start:dev"]

@@ -1,0 +1,44 @@
+# Build stage
+FROM oven/bun:1-alpine AS builder
+
+WORKDIR /app
+
+COPY package.json bun.lock* ./
+RUN bun install --frozen-lockfile
+
+COPY . .
+RUN bunx prisma generate
+RUN bun run build
+
+RUN bunx tsc prisma/seed.ts --outDir dist/prisma --module commonjs --target ES2021 --skipLibCheck true --esModuleInterop true
+
+# Production stage
+FROM oven/bun:1-alpine
+
+WORKDIR /app
+
+# 建立非 root 使用者
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nestjs -u 1001
+
+# 安裝 netcat (用於 wait-for script)
+RUN apk add --no-cache netcat-openbsd
+
+COPY --chown=nestjs:nodejs package.json bun.lock* ./
+
+# 複製建置結果和其他必要檔案
+COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
+COPY --from=builder --chown=nestjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
+
+# 複製 entrypoint script
+COPY --chown=nestjs:nodejs docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+USER nestjs
+
+EXPOSE 3000
+
+ENTRYPOINT ["docker-entrypoint.sh"]
+
+CMD ["bun", "run", "dist/src/main.js"]

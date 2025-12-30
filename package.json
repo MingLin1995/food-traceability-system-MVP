@@ -1,0 +1,8 @@
+{
+  "name": "food-traceability-system-root",
+  "private": true,
+  "scripts": {
+    "dev": "./dev.sh",
+    "deploy": "./deploy.sh"
+  }
+}
