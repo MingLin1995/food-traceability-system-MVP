@@ -35,3 +35,23 @@ export const ApiCreatedResponseGeneric = <DataDto extends Type<unknown>>(dataDto
             },
         }),
     );
+
+export const ApiOkResponseGenericArray = <DataDto extends Type<unknown>>(dataDto: DataDto) =>
+    applyDecorators(
+        ApiExtraModels(ApiResponseDto, dataDto),
+        ApiOkResponse({
+            schema: {
+                allOf: [
+                    { $ref: getSchemaPath(ApiResponseDto) },
+                    {
+                        properties: {
+                            data: {
+                                type: 'array',
+                                items: { $ref: getSchemaPath(dataDto) },
+                            },
+                        },
+                    },
+                ],
+            },
+        }),
+    );

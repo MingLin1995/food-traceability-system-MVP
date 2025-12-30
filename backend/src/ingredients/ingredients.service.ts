@@ -10,7 +10,7 @@ export class IngredientsService {
 
     async create(createIngredientDto: CreateIngredientDto) {
         const { productionDate, expiryDate, ...rest } = createIngredientDto;
-        return this.prisma.ingredient.create({
+        return this.prisma.client.ingredient.create({
             data: {
                 ...rest,
                 productionDate: new Date(productionDate),
@@ -20,13 +20,13 @@ export class IngredientsService {
     }
 
     findAll() {
-        return this.prisma.ingredient.findMany({
+        return this.prisma.client.ingredient.findMany({
             orderBy: { createdAt: 'desc' },
         });
     }
 
     async findOneByBatch(batchNumber: string) {
-        const ingredient = await this.prisma.ingredient.findUnique({
+        const ingredient = await this.prisma.client.ingredient.findUnique({
             where: { batchNumber },
         });
         if (!ingredient) {
@@ -38,26 +38,27 @@ export class IngredientsService {
     async update(id: string, updateIngredientDto: UpdateIngredientDto) {
         const { productionDate, expiryDate, ...rest } = updateIngredientDto;
 
-        // Check if exists
-        const exists = await this.prisma.ingredient.findUnique({ where: { id } });
+        const exists = await this.prisma.client.ingredient.findUnique({ where: { id } });
         if (!exists) throw new NotFoundException(`Ingredient with ID ${id} not found`);
 
         const data: any = { ...rest };
         if (productionDate) data.productionDate = new Date(productionDate);
         if (expiryDate) data.expiryDate = new Date(expiryDate);
 
-        return this.prisma.ingredient.update({
+        return this.prisma.client.ingredient.update({
             where: { id },
             data,
         });
     }
 
     async remove(id: string) {
-        const exists = await this.prisma.ingredient.findUnique({ where: { id } });
+        const exists = await this.prisma.client.ingredient.findUnique({ where: { id } });
         if (!exists) throw new NotFoundException(`Ingredient with ID ${id} not found`);
 
-        return this.prisma.ingredient.delete({
+        await this.prisma.client.ingredient.delete({
             where: { id },
         });
+
+        return { message: 'Ingredient deleted successfully' };
     }
 }

@@ -104,8 +104,7 @@ bun run dev
 ### 2. 管理後台 (Admin)
 
 - 查看所有食材列表。
-- 新增食材批號資料。
-- 刪除錯誤資料。
+- 新增、更新、刪除食材批號資料。
 - 預設帳號: 無 (目前為開放後台，未來將整合後端 Auth)。
 
 ### 3. API 服務
@@ -113,6 +112,7 @@ bun run dev
 - `GET /ingredients`: 取得列表
 - `GET /ingredients/:batchNumber`: 依批號查詢
 - `POST /ingredients`: 新增資料
+- `PUT /ingredients/:id`: 更新資料
 - `DELETE /ingredients/:id`: 刪除資料
 
 ## 常用指令

@@ -53,8 +53,8 @@ async function bootstrap() {
   const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 
   const config = new DocumentBuilder()
-    .setTitle('NestJS Template API')
-    .setDescription('時間格式一率使用 UTC+0，相關判斷由前後端各自處理')
+    .setTitle('Food Traceability System')
+    .setDescription('食材履歷追溯系統')
     .setVersion(`v${packageJson.version}`)
     .addBearerAuth()
     .build();
