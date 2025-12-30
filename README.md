@@ -20,7 +20,7 @@ food-traceability-system/
 ├── docker-compose.dev.yml  # 開發環境 Docker 配置
 ├── dev.sh                  # 啟動腳本
 ├── docs/                   # 專案文檔
-└── 开发流程.md              # 開發進度規劃
+└── Development-process.md  # 開發進度規劃
 ```
 
 ## Monorepo 與版本管理
