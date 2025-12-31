@@ -2,8 +2,11 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 function getAuthHeaders(): Record<string, string> {
+    if (typeof window === 'undefined') return {};
     const token = localStorage.getItem('token');
-    return token ? { 'Authorization': `Bearer ${token}` } : {};
+
+    if (!token || token === 'undefined') return {};
+    return { 'Authorization': `Bearer ${token}` };
 }
 
 export async function login(account: string, password: string) {
@@ -47,6 +50,19 @@ export async function createIngredient(data: any) {
     return res.json();
 }
 
+export async function updateIngredient(id: string, data: any) {
+    const res = await fetch(`${API_URL}/ingredients/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeaders()
+        },
+        body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error('Failed to update ingredient');
+    return res.json();
+}
+
 export async function deleteIngredient(id: string) {
     const res = await fetch(`${API_URL}/ingredients/${id}`, {
         method: 'DELETE',
@@ -55,3 +71,16 @@ export async function deleteIngredient(id: string) {
     if (!res.ok) throw new Error('Failed to delete ingredient');
     return res.json();
 }
+
+export function formatDate(dateInput: string | Date): string {
+    if (!dateInput) return '';
+    const date = new Date(dateInput);
+    if (isNaN(date.getTime())) return '';
+
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+
+    return `${yyyy}/${mm}/${dd}`;
+}
+

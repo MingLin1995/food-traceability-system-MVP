@@ -19,9 +19,13 @@ export default function AdminLogin() {
 
         try {
             const data = await login(account, password);
-            // Store token
-            localStorage.setItem('token', data.accessToken);
-            router.push('/admin');
+            const token = data.data?.accessToken;
+            if (token) {
+                localStorage.setItem('token', token);
+                router.push('/admin');
+            } else {
+                throw new Error('Invalid response format');
+            }
         } catch (err) {
             setError('登入失敗，請檢查帳號密碼');
         } finally {

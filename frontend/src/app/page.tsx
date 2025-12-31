@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { fetchIngredients } from '@/lib/api';
+import { fetchIngredients, formatDate } from '@/lib/api';
 import Link from 'next/link';
 
 export default function Home() {
@@ -101,11 +101,11 @@ export default function Home() {
                     </div>
                     <div className="bg-black/30 p-3 rounded-lg border border-zinc-800/50">
                       <span className="block text-zinc-500 text-xs mb-1">Produced</span>
-                      <span className="text-zinc-200 font-medium">{new Date(result.productionDate).toLocaleDateString()}</span>
+                      <span className="text-zinc-200 font-medium">{formatDate(result.productionDate)}</span>
                     </div>
                     <div className="bg-black/30 p-3 rounded-lg border border-zinc-800/50">
                       <span className="block text-zinc-500 text-xs mb-1">Expires</span>
-                      <span className="text-zinc-200 font-medium">{new Date(result.expiryDate).toLocaleDateString()}</span>
+                      <span className="text-zinc-200 font-medium">{formatDate(result.expiryDate)}</span>
                     </div>
                   </div>
 
@@ -135,14 +135,19 @@ export default function Home() {
         </div>
       </main>
 
-      <footer className="p-6 text-center space-y-4">
+      <footer className="p-8 text-center space-y-6">
         <div>
-          <Link href="/admin/login" className="inline-block border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white px-4 py-2 rounded-lg text-sm transition-all hover:scale-105">
-            Admin Login
+          <Link
+            href="/admin"
+            className="inline-flex items-center gap-2 border border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-400 hover:text-emerald-300 px-6 py-2.5 rounded-full text-sm font-bold tracking-widest transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(16,185,129,0.15)] uppercase"
+          >
+            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+            Admin Console
           </Link>
         </div>
-        <div className="text-zinc-600 text-[10px] font-mono tracking-widest opacity-50">
-          SYSTEM v{process.env.NEXT_PUBLIC_APP_VERSION}
+        <div className="flex flex-col items-center gap-1">
+          <div className="h-px w-12 bg-zinc-800 mb-2" />
+          <span className="text-zinc-500">v{process.env.NEXT_PUBLIC_APP_VERSION}</span>
         </div>
       </footer>
     </div>
