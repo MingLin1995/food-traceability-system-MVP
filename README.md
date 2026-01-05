@@ -5,11 +5,27 @@
 
 ## 系統架構
 
-本專案採用 Monorepo 結構，包含前後端與基礎設施：
+本專案採用 Monorepo 結構，包含前後端、AI 服務與基礎設施：
 
 - **Frontend**: Next.js (App Router) + Tailwind CSS
 - **Backend**: NestJS + Prisma + PostgreSQL
+- **LLM Service**: Python + FastAPI + Ollama (本地 AI 模型)
 - **Infrastructure**: Docker Compose
+
+### 服務架構圖
+
+```
+┌─────────────┐      ┌─────────────┐      ┌─────────────┐
+│   Frontend  │─────▶│   Backend   │─────▶│ LLM Service │
+│  (Next.js)  │      │  (NestJS)   │      │  (FastAPI)  │
+│  Port 3001  │      │  Port 3000  │      │  Port 8001  │
+└─────────────┘      └──────┬──────┘      └──────┬──────┘
+                            │                     │
+                     ┌──────▼──────┐       ┌──────▼──────┐
+                     │  PostgreSQL │       │   Ollama    │
+                     │  Port 5432  │       │  Port 11434 │
+                     └─────────────┘       └─────────────┘
+```
 
 ## 目錄結構
 
@@ -17,9 +33,11 @@
 food-traceability-system/
 ├── backend/                # NestJS 後端應用 (獨立 package.json)
 ├── frontend/               # Next.js 前端應用 (獨立 package.json)
+├── llm-service/            # Python FastAPI LLM 服務 (獨立 requirements.txt)
 ├── docker-compose.dev.yml  # 開發環境 Docker 配置
-├── dev.sh                  # 啟動腳本
-├── docs/                   # 專案文檔
+├── docker-compose.yml      # 生產環境 Docker 配置
+├── dev.sh                  # 開發環境啟動腳本
+├── deploy.sh               # 生產環境部署腳本
 └── Development-process.md  # 開發進度規劃
 ```
 
@@ -81,7 +99,7 @@ cat package.json | grep version
 我們提供了一鍵啟動腳本，會自動處理容器建置與服務啟動：
 
 ```bash
-# 啟動系統 (包含 Database, Backend, Frontend)
+# 啟動系統 (包含 Database, Backend, Frontend, LLM Service, Ollama)
 ./dev.sh
 # 或
 bun run dev
@@ -92,7 +110,10 @@ bun run dev
 - **前端頁面 (Consumer)**: [http://localhost:3001](http://localhost:3001)
 - **管理後台 (Admin)**: [http://localhost:3001/admin](http://localhost:3001/admin)
 - **後端 API**: [http://localhost:3000](http://localhost:3000)
-- **Swagger API 文件**: [http://localhost:3000/apidoc](http://localhost:3000/apidoc)
+- **Swagger API 文件 (Backend)**: [http://localhost:3000/apidoc](http://localhost:3000/apidoc)
+- **LLM Service API**: [http://localhost:8001](http://localhost:8001)
+- **LLM Service 文件**: [http://localhost:8001/docs](http://localhost:8001/docs)
+- **Ollama API**: [http://localhost:11434](http://localhost:11434)
 
 ## 功能說明
 
@@ -101,19 +122,38 @@ bun run dev
 - 輸入批號 (例如: `MG20241201-001`) 查詢食材詳細資訊。
 - 顯示資訊：品名、產地、供應商、生產/有效日期、檢驗結果。
 
-### 2. 管理後台 (Admin)
+### 2. AI 智能查詢 (AI Chat)
 
-- 查看所有食材列表。
-- 新增、更新、刪除食材批號資料。
-- 預設帳號: 無 (目前為開放後台，未來將整合後端 Auth)。
+- 使用自然語言詢問食材相關問題
+- 例如：「請問有哪些食材？」、「芒果的檢驗結果如何？」
+- 基於本地 Ollama LLM 模型（llama2）提供智能回應
+- 自動從資料庫取得最新食材資訊作為上下文
 
-### 3. API 服務
+### 3. 管理後台 (Admin)
 
-- `GET /ingredients`: 取得列表
+- 查看所有食材列表
+- 新增、更新、刪除食材批號資料
+- 需要登入（預設帳號請參考 `.env` 中的 `ADMIN_ACCOUNT_*` 設定）
+
+### 4. API 服務
+
+#### Backend API (NestJS)
+
+- `GET /ingredients`: 取得食材列表
 - `GET /ingredients/:batchNumber`: 依批號查詢
 - `POST /ingredients`: 新增資料
 - `PUT /ingredients/:id`: 更新資料
 - `DELETE /ingredients/:id`: 刪除資料
+- `POST /auth/login`: 管理員登入
+- `POST /llm/chat`: AI 聊天（透過 LLM Service）
+- `GET /llm/health`: LLM 服務健康檢查
+
+#### LLM Service API (FastAPI)
+
+- `POST /chat/`: AI 聊天端點
+- `GET /health`: 健康檢查（包含 Ollama 連線狀態）
+- `GET /`: 服務資訊
+- `GET /docs`: FastAPI 自動生成的 API 文件（Swagger UI）
 
 ## 常用指令
 
@@ -143,6 +183,29 @@ docker compose -f docker-compose.dev.yml exec app bunx prisma migrate dev
 
 前端程式碼位於 `frontend/`，修改後存檔即時生效 (HMR)。
 
+### LLM Service 開發
+
+LLM Service 使用 Python + FastAPI，程式碼位於 `llm-service/`。
+
+```bash
+# 查看 LLM Service 日誌
+docker logs food-traceability-llm-dev -f
+
+# 重啟 LLM Service
+docker compose -f docker-compose.dev.yml restart llm-service
+
+# 測試 LLM Service
+curl -X POST http://localhost:8001/chat/ \
+  -H "Content-Type: application/json" \
+  -d '{"message": "請問有哪些食材？"}'
+```
+
+**注意事項：**
+
+- 首次啟動時，Ollama 會自動下載 `llama2` 模型（約 3.8GB），需要一些時間
+- LLM 推理需要較多記憶體，建議至少 8GB RAM
+- 模型載入後的首次查詢可能需要 30-60 秒
+
 ---
 
-**專案狀態**: MVP Phase 2 Update (Frontend Integrated)
+**專案狀態**: MVP Phase 3 (LLM Service Integrated)
