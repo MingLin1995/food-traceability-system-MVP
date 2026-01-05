@@ -84,3 +84,21 @@ export function formatDate(dateInput: string | Date): string {
     return `${yyyy}/${mm}/${dd}`;
 }
 
+
+export async function chatWithAI(message: string, history: { role: string; content: string }[] = []) {
+    const response = await fetch(`${API_URL}/llm/chat`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message, conversation_history: history }),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message?.[0] || 'AI 服務暫時無法連線');
+    }
+
+    const json = await response.json();
+    return json.data;
+}

@@ -16,6 +16,7 @@ import { LogsModule } from './logs/logs.module';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { LogCleanupService } from './tasks/log-cleanup.service';
 import { PrismaModule } from './common/prisma/prisma.module';
+import { LlmModule } from './llm/llm.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { PrismaModule } from './common/prisma/prisma.module';
     UsersModule,
     IngredientsModule,
     LogsModule,
+    LlmModule,
   ],
   controllers: [AppController],
   providers: [

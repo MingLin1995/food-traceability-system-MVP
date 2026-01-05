@@ -135,8 +135,19 @@ export default function Home() {
         </div>
       </main>
 
-      <footer className="p-8 text-center space-y-6">
-        <div>
+      {/* Footer */}
+      <footer className="mt-16 text-center space-y-4">
+        <div className="flex justify-center gap-6">
+          <Link
+            href="/chat"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/20 hover:bg-emerald-500/20 transition-all text-sm font-medium"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            </svg>
+            AI 智能助手
+          </Link>
+
           <Link
             href="/admin"
             className="inline-flex items-center gap-2 border border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-400 hover:text-emerald-300 px-6 py-2.5 rounded-full text-sm font-bold tracking-widest transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(16,185,129,0.15)] uppercase"
@@ -147,7 +158,7 @@ export default function Home() {
         </div>
         <div className="flex flex-col items-center gap-1">
           <div className="h-px w-12 bg-zinc-800 mb-2" />
-          <span className="text-zinc-500">v{process.env.NEXT_PUBLIC_APP_VERSION}</span>
+          <span className="text-white">v{process.env.NEXT_PUBLIC_APP_VERSION}</span>
         </div>
       </footer>
     </div>
