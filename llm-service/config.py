@@ -4,7 +4,7 @@ from typing import Union
 class Settings(BaseSettings):
     # Service Configuration
     SERVICE_NAME: str = "LLM Service"
-    SERVICE_VERSION: str = "0.1.0"
+    SERVICE_VERSION: str = "1.0.0"
     HOST: str = "0.0.0.0"
     
     # PORT: 容器內部監聽端口（固定為 8000）
