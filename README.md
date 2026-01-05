@@ -10,6 +10,7 @@
 - **Frontend**: Next.js (App Router) + Tailwind CSS
 - **Backend**: NestJS + Prisma + PostgreSQL
 - **LLM Service**: Python + FastAPI + Ollama (本地 AI 模型)
+- **Cache**: Redis (快取 AI 回應)
 - **Infrastructure**: Docker Compose
 
 ### 服務架構圖
@@ -19,12 +20,19 @@
 │   Frontend  │─────▶│   Backend   │─────▶│ LLM Service │
 │  (Next.js)  │      │  (NestJS)   │      │  (FastAPI)  │
 │  Port 3001  │      │  Port 3000  │      │  Port 8001  │
-└─────────────┘      └──────┬──────┘      └──────┬──────┘
-                            │                     │
-                     ┌──────▼──────┐       ┌──────▼──────┐
-                     │  PostgreSQL │       │   Ollama    │
-                     │  Port 5432  │       │  Port 11434 │
-                     └─────────────┘       └─────────────┘
+└─────────────┘      └──────┬──────┘      └──────┬─┬────┘
+                            │                    │ │
+                     ┌──────▼──────┐             │ │
+                     │  PostgreSQL │             │ │
+                     │  Port 5432  │      ┌──────▼─▼────┐
+                     └─────────────┘      │   Red is    │
+                                          │  Port 6379  │
+                                          └─────────────┘
+                                                 │
+                                          ┌──────▼──────┐
+                                          │   Ollama    │
+                                          │  Port 11434 │
+                                          └─────────────┘
 ```
 
 ## 目錄結構
@@ -208,4 +216,4 @@ curl -X POST http://localhost:8001/chat/ \
 
 ---
 
-**專案狀態**: MVP Phase 3 (LLM Service Integrated)
+**專案狀態**: MVP Phase 3 (LLM Service Integrated with Redis Caching)
