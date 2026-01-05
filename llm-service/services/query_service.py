@@ -47,8 +47,10 @@ class QueryService:
         if not ingredients:
             return "目前沒有食材資訊。"
         
+        sorted_ingredients = sorted(ingredients, key=lambda x: x.get('batchNumber', ''))
+        
         context_parts = []
-        for ing in ingredients:
+        for ing in sorted_ingredients:
             info = (
                 f"批號: {ing.get('batchNumber')}, "
                 f"名稱: {ing.get('name')}, "
@@ -59,7 +61,8 @@ class QueryService:
             
             test_details = ing.get('testDetails')
             if test_details and isinstance(test_details, dict):
-                details_str = "; ".join([f"{key}: {value}" for key, value in test_details.items()])
+                sorted_details = sorted(test_details.items())
+                details_str = "; ".join([f"{key}: {value}" for key, value in sorted_details])
                 info += f", 檢驗細節: ({details_str})"
             
             context_parts.append(info)

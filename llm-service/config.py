@@ -18,6 +18,13 @@ class Settings(BaseSettings):
     # BACKEND_INTERNAL_URL: Backend 服務的內部網路位址
     BACKEND_INTERNAL_URL: str = "http://app:3000"
     
+
+    # Redis Configuration
+    REDIS_HOST: str = "redis"
+    REDIS_PORT: int = 6379
+    REDIS_DB: int = 0
+    REDIS_TTL: int = 3600  # 1 hour default
+    
     # CORS Configuration
     # CORS_ORIGINS: 允許的跨域來源（逗號分隔）
     CORS_ORIGINS: str = "http://localhost:3000"

@@ -59,6 +59,15 @@ services:
       - app-network
     restart: always
 
+  redis:
+    image: redis:8.4-alpine
+    container_name: ${PROJECT_NAME:-app}-redis
+    ports:
+      - '${REDIS_PORT:-6379}:6379'
+    networks:
+      - app-network
+    restart: unless-stopped
+
   llm-service:
     build:
       context: ./llm-service
@@ -69,9 +78,12 @@ services:
       - OLLAMA_MODEL=${OLLAMA_MODEL:-llama2}
       - BACKEND_INTERNAL_URL=${BACKEND_INTERNAL_URL:-http://app:3000}
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     depends_on:
       - ollama
       - app
+      - redis
     networks:
       - app-network
     restart: always

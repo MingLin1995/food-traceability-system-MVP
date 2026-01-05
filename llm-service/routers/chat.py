@@ -2,6 +2,13 @@ from fastapi import APIRouter, HTTPException
 from models.schemas import ChatRequest, ChatResponse
 from services.ollama_service import ollama_service
 from services.query_service import query_service
+from services.redis_service import redis_service
+import hashlib
+
+def generate_cache_key(prompt: str, history: list, model: str, context: str) -> str:
+    """生成快取鍵"""
+    content = f"{prompt}:{model}:{context}"
+    return f"llm_cache:{hashlib.sha256(content.encode()).hexdigest()}"
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -34,12 +41,25 @@ async def chat(request: ChatRequest):
         if request.conversation_history:
             history_msgs = [{"role": m.role, "content": m.content} for m in request.conversation_history]
 
+        # 檢查快取
+        cache_key = generate_cache_key(user_prompt, history_msgs, ollama_service.model, context)
+        cached_response = await redis_service.get_cache(cache_key)
+        
+        if cached_response:
+            return ChatResponse(
+                response=cached_response,
+                model=ollama_service.model
+            )
+
         response_text = await ollama_service.generate_response(
             prompt=user_prompt,
             system_prompt=system_prompt_with_context,
             history=history_msgs,
             temperature=0.7
         )
+        
+        # 寫入快取
+        await redis_service.set_cache(cache_key, response_text)
         
         return ChatResponse(
             response=response_text,
