@@ -16,8 +16,8 @@ export class AppController {
   }
 
   @Public()
-  @Get()
-  @ApiOperation({ summary: 'API 連線測試' })
+  @Get('health')
+  @ApiOperation({ summary: 'API 健康檢查' })
   getHealth() {
     return {
       status: 'ok',

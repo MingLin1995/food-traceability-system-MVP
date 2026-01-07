@@ -32,8 +32,10 @@ async function bootstrap() {
   // 是否啟用 CORS
   if (process.env.ENABLE_CORS === 'true') {
     const corsOrigins = process.env.CORS_ORIGINS?.split(',') || '*';
+    const isWildcard = corsOrigins === '*' || (Array.isArray(corsOrigins) && corsOrigins.includes('*'));
+
     app.enableCors({
-      origin: corsOrigins,
+      origin: isWildcard ? true : corsOrigins,
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'], // x-line-userId

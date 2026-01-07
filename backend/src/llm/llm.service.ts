@@ -21,8 +21,9 @@ export class LlmService {
 
     async chat(chatRequest: ChatRequestDto): Promise<ChatResponseDataDto> {
         try {
+            const url = `${this.llmServiceUrl}/chat/`;
             const response = await firstValueFrom(
-                this.httpService.post(`${this.llmServiceUrl}/chat/`, chatRequest),
+                this.httpService.post(url, chatRequest),
             );
 
             return {

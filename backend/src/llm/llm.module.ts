@@ -6,7 +6,7 @@ import { LlmService } from './llm.service';
 @Module({
     imports: [
         HttpModule.register({
-            timeout: 120000, // 120 seconds for LLM responses
+            timeout: 300000, // 300 seconds (5 mins) for slow LLM responses
             maxRedirects: 5,
         }),
     ],

@@ -2,11 +2,11 @@
 set -e
 
 # Wait for database
-echo "Waiting for database..."
+echo "Waiting for database at ${POSTGRES_HOST:-db}..."
 RETRY_COUNT=0
 MAX_RETRIES=30
 
-while ! nc -z db 5432; do
+while ! nc -z ${POSTGRES_HOST:-db} 5432; do
   RETRY_COUNT=$((RETRY_COUNT + 1))
   if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
     echo "ERROR: Database connection timeout after ${MAX_RETRIES} attempts"
