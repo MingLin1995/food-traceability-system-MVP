@@ -27,10 +27,9 @@ class OllamaService:
             if self.model not in model_names:
                 print(f"Pulling model {self.model}...")
                 stream = await self.client.pull(self.model, stream=True)
-                for progress in stream:
+                async for progress in stream:
                     print(f"Pull progress: {progress.get('status', '')} {progress.get('completed', 0)}/{progress.get('total', 1)}")
                 print(f"Model {self.model} pulled successfully")
-            
             return True
         except Exception as e:
             print(f"Failed to ensure model availability: {e}")
@@ -64,7 +63,7 @@ class OllamaService:
                 'content': prompt
             })
             
-            response = self.client.chat(
+            response = await self.client.chat(
                 model=self.model,
                 messages=messages,
                 options={
