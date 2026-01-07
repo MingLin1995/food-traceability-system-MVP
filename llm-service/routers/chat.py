@@ -55,7 +55,7 @@ async def chat(request: ChatRequest):
             prompt=user_prompt,
             system_prompt=system_prompt_with_context,
             history=history_msgs,
-            temperature=0.7
+            temperature=0.3
         )
         
         # 寫入快取

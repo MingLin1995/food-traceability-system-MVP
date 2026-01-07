@@ -18,8 +18,9 @@ async def lifespan(app: FastAPI):
     connected = await ollama_service.check_connection()
     if connected:
         print("Ollama connection successful")
-        # 確保模型已下載
-        await ollama_service.ensure_model_available()
+        # 在背景啟動模型檢查/下載，不阻塞 API 啟動
+        import asyncio
+        asyncio.create_task(ollama_service.ensure_model_available())
     else:
         print("Ollama connection failed - service will start but may not work properly")
     
@@ -55,6 +56,11 @@ async def root():
         "version": settings.SERVICE_VERSION,
         "status": "running"
     }
+
+@app.get("/liveness", tags=["health"])
+async def liveness():
+    """存活檢查端點 (不檢查依賴)"""
+    return {"status": "alive"}
 
 @app.get("/health", response_model=HealthResponse, tags=["health"])
 async def health_check():

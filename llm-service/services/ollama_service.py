@@ -1,4 +1,4 @@
-import ollama
+from ollama import AsyncClient
 from typing import List, Dict, Any
 from config import settings
 
@@ -6,13 +6,13 @@ class OllamaService:
     """Ollama LLM 服務封裝"""
     
     def __init__(self):
-        self.client = ollama.Client(host=settings.OLLAMA_INTERNAL_URL)
+        self.client = AsyncClient(host=settings.OLLAMA_INTERNAL_URL)
         self.model = settings.OLLAMA_MODEL
     
     async def check_connection(self) -> bool:
         """檢查 Ollama 連線狀態"""
         try:
-            models = self.client.list()
+            models = await self.client.list()
             return True
         except Exception as e:
             print(f"Ollama connection failed: {e}")
@@ -21,12 +21,14 @@ class OllamaService:
     async def ensure_model_available(self) -> bool:
         """確保模型已下載"""
         try:
-            models = self.client.list()
-            model_names = [model['name'] for model in models.get('models', [])]
+            models = await self.client.list()
+            model_names = [m['name'] for m in models.get('models', [])]
             
             if self.model not in model_names:
                 print(f"Pulling model {self.model}...")
-                self.client.pull(self.model)
+                stream = await self.client.pull(self.model, stream=True)
+                for progress in stream:
+                    print(f"Pull progress: {progress.get('status', '')} {progress.get('completed', 0)}/{progress.get('total', 1)}")
                 print(f"Model {self.model} pulled successfully")
             
             return True
