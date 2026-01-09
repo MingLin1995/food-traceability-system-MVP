@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service # 資源類型
+metadata:
+  name: backend
+spec:
+  type: NodePort # 或 ClusterIP(集群內部才可以訪問)
+  ports:
+    - port: 3000 # 集群內其他服務呼叫此 Service 時使用的端口（例如 http://backend:3000）
+      targetPort: 3000 # 必須與容器內應用程式實際監聽的端口完全一致
+      nodePort: 30000 # 外部訪問用的固定端口（僅 NodePort 需要，本機用 http://minikube-ip:30000 範圍 30000-32767）
+  selector:
+    app: backend # 指向 Deployment 管理的 Pod

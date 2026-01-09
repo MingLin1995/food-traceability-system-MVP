@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ollama
+  template:
+    metadata:
+      labels:
+        app: ollama
+    spec:
+      containers:
+        - name: ollama
+          image: ollama/ollama:latest
+          volumeMounts:
+            - name: ollama-data
+              mountPath: /root/.ollama
+          ports:
+            - containerPort: 11434
+          resources:
+            requests:
+              cpu: '2000m'
+              memory: '4Gi'
+            limits:
+              cpu: '6000m' # 用掉 8 核中的 6 核
+              memory: '12Gi' # 用掉 16G 中的 12G
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 11434
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 11434
+            initialDelaySeconds: 20
+            periodSeconds: 20
+      volumes:
+        - name: ollama-data
+          persistentVolumeClaim:
+            claimName: ollama-pvc

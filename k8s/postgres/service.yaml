@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app: postgres
+  clusterIP: None # Headless service 不做負載均衡，回傳所有符合 selector 的 Pod

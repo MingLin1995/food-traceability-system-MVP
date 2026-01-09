@@ -11,7 +11,7 @@
 - **Backend**: NestJS + Prisma + PostgreSQL
 - **LLM Service**: Python + FastAPI + Ollama (本地 AI 模型)
 - **Cache**: Redis (快取 AI 回應)
-- **Infrastructure**: Docker Compose
+- **Infrastructure**: Docker Compose & Kubernetes (Minikube)
 
 ### 服務架構圖
 
@@ -122,6 +122,36 @@ bun run dev
 - **LLM Service API**: [http://localhost:8001](http://localhost:8001)
 - **LLM Service 文件**: [http://localhost:8001/docs](http://localhost:8001/docs)
 - **Ollama API**: [http://localhost:11434](http://localhost:11434)
+
+## Kubernetes 部署 (Minikube)
+
+本專案支援在 Kubernetes 環境中運行。詳細操作請參考 [Kubernetes (K8s) 學習筆記](https://medium.com/@MingLin1995/kubernetes-k8s-%E5%BE%9E%E8%A7%80%E5%BF%B5%E5%88%B0%E5%AF%A6%E6%88%B0-%E5%AD%B8%E7%BF%92%E7%AD%86%E8%A8%98-f99b31c31cf3)。
+
+### 一鍵部署
+
+執行以下腳本，會自動指向 Minikube Docker daemon 並編譯、佈署所有服務：
+
+```bash
+./scripts/k8s-deploy.sh
+```
+
+### 監控模型下載進度 (必備步驟)
+
+由於 **Llama2** 模型檔案較大 (3.8GB)，首次啟動時 `llm-service` 會在背景自動下載模型。開發者**務必**執行以下指令確認下載進度：
+
+```bash
+# 持續觀察下載進度
+kubectl logs -l app=llm-service -f
+```
+
+**注意**：請等到日誌顯示 `Model llama2 pulled successfully` 後，再進行 AI 功能的測試。若在下載完成前呼叫，API 會傳回 503 錯誤。
+
+### 存取位址
+
+部署後可透過 Minikube IP 及其 NodePort 存取：
+
+- **前端頁面**: `http://$(minikube ip):30001`
+- **後端 API**: `http://$(minikube ip):30000`
 
 ## 功能說明
 

@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: food-traceability-backend:latest
+          imagePullPolicy: IfNotPresent # 拉取策略：如果本地已有此 image，就不從遠端 registry 拉（適合本地開發）
+          ports:
+            - containerPort: 3000 # 容器內應用監聽的端口（僅供參考，Service 會用來對應）
+          envFrom: # 從 ConfigMap 批量匯入所有環境變數
+            - configMapRef:
+                name: app-config
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: POSTGRES_PASSWORD
+            - name: DATABASE_URL
+              value: 'postgresql://postgres:$(POSTGRES_PASSWORD)@postgres:5432/food_traceability?schema=public'
+            - name: ENABLE_CORS
+              value: 'true'
+            - name: CORS_ORIGINS
+              value: '*'
+          resources:
+            requests:
+              cpu: '100m'
+              memory: '256Mi'
+            limits:
+              cpu: '500m'
+              memory: '512Mi'
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 20
